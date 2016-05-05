@@ -7,3 +7,6 @@ Software applying the Multilevel Monte Carlo method to a wide range of high dime
 Under Construction! 
 Check back here soon for more updates!
 
+[comment]: <> (This is the line to put in terminal to cancel md files: find . -name "*.pyc" -exec git rm -f {} \;)
+
+
