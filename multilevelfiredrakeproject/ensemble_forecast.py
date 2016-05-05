@@ -51,6 +51,13 @@ class EnsembleForecast():
         # convert back to function
         if transfered==1:
             EnsembleHierarchy.EnsembleTransfer(To="Function")
+        # revert ensemble
+        AE=[]
+        for i in range(len(self.Ensemble)):
+            AE.append([])
+            for j in range(len(self.Ensemble[i])):
+                AE[i].append(self.__ReturnMultiD(self.Ensemble[i][j],self.requiredshape))
+        self.Ensemble=AE
     def __WeightedSampleQuantile(self,u,X,W):
         """ Finds the consistent approximation to the quantile function F^(-1)(u)=x where u~U[0,1], x~X, for given u 
         Inputs:
