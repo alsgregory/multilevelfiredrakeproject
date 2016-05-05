@@ -306,7 +306,8 @@ FileMember = File("ensemble_member_q.pvd")
 Forecast.Forecast[1].rename('function')
 FileMember << Forecast.Forecast[1]
 
-
+ensemble_hierarchy.EnsembleTransfer('Function')
+MLMCMean=ensemble_hierarchy.MultilevelExpectation
 # Multilevel Mean
 
 FileMember = File("mean_q.pvd")

@@ -48,6 +48,11 @@ def test_ensemble_forecast_original_ensemble(Save,Forecast):
 test_ensemble_forecast_original_ensemble(Save,Forecast)
 
 
+def test_ensemble_forecast_positive_definite(Forecast):
+    covariance=Forecast.Cov
+    if np.all(np.linalg.eigh(covariance)[0]>0)!=1:
+        raise ValueError('covariance matrix is not positive definite')
 
+test_ensemble_forecast_positive_definite(Forecast)
 
 

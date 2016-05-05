@@ -137,7 +137,7 @@ class EnsembleForecast():
             if i==0:
                 C=np.cov(Ensembles[0][1])
             else:
-                C+=np.cov(Ensembles[i][1]-Ensembles[i][0])
+                C+=np.cov(Ensembles[i][1])-np.cov(Ensembles[i][0])
         return C
     def __FlattenMultiD(self,MultiDArray):
         """
@@ -252,7 +252,7 @@ class SpatialPostProcessing():
                 al=am
             else:
                 ar=am
-        return am
+        return al
     def __CovintoCorr(self,Cov):
         D=len(Cov[0,:])
         Corr=np.zeros((D,D))
@@ -262,27 +262,27 @@ class SpatialPostProcessing():
     def __JointNormalTransform(self):
         """ This samples N Uniform points to invert marginals! """
         # convert into standard normal - correlation matrix!
-        Corr=self.__CovintoCorr(self.C)
         print colored('Finding delta needed to shrink mutlilevel covariance...')
         # Carry out localisation and shrinking to guarantee Pos Def - Print Delta needed!
-        delta=self.__bisectionmethod(Corr)
+        delta=self.__bisectionmethod(self.C)
         print colored('Delta Needed To Shrink MLMC Cov: '+str(delta),'green')
         self.Delta=delta # save delta used for forecast
         print colored('Shrinking multilevel covariance...','green')
-        Corr=self.__Shrink(Corr,delta)
+        self.C=self.__Shrink(self.C,delta)
         if self.T==True:
             print colored('Tapering multilevel covariance...','green')
-            Corr=self.__Tapering(Corr)
+            self.C=self.__Tapering(self.C)
             print colored('Tapered and Shrunk','green')
         else:
             print colored('Shrunk','green')
         # Sample from MVN
-        Samples=np.random.multivariate_normal(np.zeros(len(self.C[0,:])),Corr,self.N).T
+        Samples=np.random.multivariate_normal(np.zeros(len(self.C[0,:])),self.C,self.N).T
         # CDF them
         print colored('Finiding Gaussian copula samples...','green')
         Uniforms=np.zeros(np.shape(Samples))
+        Sds=np.diag(self.C)
         for i in range(len(Samples[:,0])):
-            Uniforms[i,:]=NORM.cdf(Samples[i,:],0,1)
+            Uniforms[i,:]=NORM.cdf(Samples[i,:],0,np.sqrt(Sds[i]))
         return Uniforms
     
     
