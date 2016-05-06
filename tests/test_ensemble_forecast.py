@@ -55,4 +55,29 @@ def test_ensemble_forecast_positive_definite(Forecast):
 
 test_ensemble_forecast_positive_definite(Forecast)
 
+def test_ensemble_forecast_delta(Forecast):
+    if Forecast.Delta>1 or Forecast.Delta<0:
+        raise ValueError('Delta used to shrink covariance matrix is not within [0,1]')
+
+test_ensemble_forecast_delta(Forecast)
+
+
+def test_ensemble_forecast_Flatten_Array(Forecast):
+    A=np.ones((10,10,10))
+    B=Forecast._EnsembleForecast__FlattenMultiD(A)
+    if np.shape(B)!=(100,10):
+        raise ValueError('Flatten Array functionality fails')
+    return B
+
+
+B=test_ensemble_forecast_Flatten_Array(Forecast)
+
+
+def test_ensemble_forecast_Return_Array(Forecast,B):
+    A=Forecast._EnsembleForecast__ReturnMultiD(B,(10,10))
+    if np.shape(A)!=(10,10,10):
+        raise ValueError('Return Multi Dimension functionality fails')
+
+
+test_ensemble_forecast_Return_Array(Forecast,B)
 
