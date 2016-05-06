@@ -253,12 +253,6 @@ class SpatialPostProcessing():
             else:
                 ar=am
         return al
-    def __CovintoCorr(self,Cov):
-        D=len(Cov[0,:])
-        Corr=np.zeros((D,D))
-        for i in range(D):
-            Corr[i,:]=np.divide(Cov[i,:],np.sqrt(np.multiply(Cov[i,i],np.diag(Cov))))
-        return Corr
     def __JointNormalTransform(self):
         """ This samples N Uniform points to invert marginals! """
         # convert into standard normal - correlation matrix!
