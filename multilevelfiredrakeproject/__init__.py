@@ -14,7 +14,7 @@ from ensemble_type import EnsembleHierarchy, CopyEnsembleHierarchy
 
 from prolong_inject import ProlongInject
 
-from discretization import Discretization, Timestep
+from discretization import Discretization, ProblemSet
 
 from initialization import setup
 

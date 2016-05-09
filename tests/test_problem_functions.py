@@ -63,7 +63,7 @@ def GenerateRandomGaussianField(FunctionSpace_Hierarchy,fine_level,df,xi):
             dW[fine_level].dat.data[:]=dW[fine_level].dat.data
     return([dWC,[dW2[fine_level],dW[fine_level]]])
 
-def time_step_solve_function(State,level_coarse,level_fine,hc,hf,Mesh,FunctionSpaceHierarchies):
+def time_step_solve_function(State,Mesh,FunctionSpaceHierarchies):
     """
     Hierarchy sets are from last time step. They are the functions as follows:
     dq1,qh,q1,psi0,psi1,q0. Function spaces can be gained from the original heirarchy set ups.
@@ -71,11 +71,11 @@ def time_step_solve_function(State,level_coarse,level_fine,hc,hf,Mesh,FunctionSp
     # Get Function spaces and state
     uh=State.state
     Vcg=FunctionSpaceHierarchies[0]
-    lvlc = level_coarse
-    lvlf = level_fine
+    lvlc = State.levels[0]
+    lvlf = State.levels[1]
     # u derivative
-    dtc = hc
-    dtf = hf
+    dtc = State.hc
+    dtf = State.hf
     xi=Constant(0.25)
     BM=GenerateRandomGaussianField(Vcg,lvlf,dtf,xi)
     for j in range(2):

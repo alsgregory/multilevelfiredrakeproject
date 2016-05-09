@@ -12,12 +12,28 @@ Alastair Gregory 2016
 from packages import *
 
 class setup():
-    def __init__(self,coarsest_mesh,L,n_function_spaces,vec,families,degrees):
+    def __init__(self,coarsest_mesh,L,FunctionSpaces):
+        """ FunctionSpaces is a list of all FS used. The mesh corresponds to coarsest_mesh. This is used to extract families and degrees / vector info """
         self.coarsest_mesh=coarsest_mesh; self.L=L
-        self.n_function_spaces=n_function_spaces
-        self.vec=vec
-        self.families=families
-        self.degrees=degrees
+        self.FunctionSpaces=FunctionSpaces
+        if type(self.FunctionSpaces)==FunctionSpace: # if just one FS
+            self.FunctionSpaces=[self.FunctionSpaces]
+        self.n_function_spaces=len(self.FunctionSpaces)
+        # now generate families and degrees from FunctionSpaces list.
+        self.vec=[]
+        self.families=[]
+        self.degrees=[]
+        for i in range(self.n_function_spaces):
+            v=float(self.FunctionSpaces[i].ufl_element().value_size())-1.0
+            d=self.FunctionSpaces[i].ufl_element().degree()
+            f=self.FunctionSpaces[i].ufl_element().family()
+            if f=='Lagrange':
+                ff='CG'
+            if f=='Discontinuous Lagrange':
+                ff='DG'
+            self.vec.append(v)
+            self.families.append(ff)
+            self.degrees.append(d)
     def GenerateMeshHierarchy(self): # mesh hierarchy will be L+1, so do finest level L here
         """ Creates a mesh hierarchy of all the levels, from mesh on coarsest level
         Outputs:

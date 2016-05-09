@@ -19,6 +19,7 @@ import test_ensemble_forecast
 import test_discretization # EDIT!
 import test_ensemble_transfer
 import test_sample_statistics
+import test_state
 
 #import test_ensemble_hierarchy # EDIT!
 

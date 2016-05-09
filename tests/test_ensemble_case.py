@@ -14,13 +14,10 @@ from test_problem_functions import *
 
 
 def make_ensemble():
-    mesh=UnitSquareMesh(2,2)
+    mesh=UnitSquareMesh(4,4)
     L=2
-    n_function_spaces=1
-    vec=[0]
-    families=['DG']
-    degrees=[1]
-    frame=setup(mesh,L,n_function_spaces,vec,families,degrees)
+    FunctionSpaces=FunctionSpace(mesh,'CG',1)
+    frame=setup(mesh,L,FunctionSpaces)
     # Generate the Mesh Hierarchy and the FunctionSpaceHierarchies
     frame.GenerateMeshHierarchy()
     frame.GenerateFunctionSpaceHierarchies()
@@ -30,22 +27,21 @@ def make_ensemble():
     T=0.25
     Courant=0.25
     ensemble_hierarchy=EnsembleHierarchy()
+    problemset=ProblemSet(initial_condition_function,time_step_solve_function,QoI)
     deg=1
-    fam='DG'
+    fam='CG'
     level_to_prolong_to=3
-    Ns=(32*2**(-np.linspace(0,2,3))).astype(int)
+    Ns=(64*2**(-np.linspace(0,2,3))).astype(int)
     for i in range(3):
         lvlc=i
         lvlf=i+1
-        nc=int(10*2**lvlc)
-        nf=int(10*2**lvlf)
-        hc=Timestep(nc,Courant).FindStableTimestep()
-        hf=Timestep(nf,Courant).FindStableTimestep()
         for j in range(Ns[i]):
-            sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
+            sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
             sample.IC()
             sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc),
-            sample.QuantityOfInterest(QoI,level_to_prolong_to,fam,deg,Mesh_Hierarchy)
+            sample.QuantityOfInterest(fam,deg)
+            if get_level(sample.solution.prepared_state[1])[1]!=len(Mesh_Hierarchy)-1:
+                raise ValueError('Prepared state does not have default level_to_prolong_to')
             ensemble_hierarchy.AppendToEnsemble(sample.solution,i) # try and do this automatically depending on the level (i.e. know where to append into) - given in sample and solution
     return ensemble_hierarchy
 

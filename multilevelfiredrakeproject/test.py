@@ -77,7 +77,8 @@ def GenerateRandomGaussianField(FunctionSpace_Hierarchy,fine_level,df,xi):
             dW[fine_level].dat.data[:]=dW[fine_level].dat.data
     return([dWC,[dW2[fine_level],dW[fine_level]]])
 
-def time_step_solve_function(State,level_coarse,level_fine,hc,hf,Mesh,FunctionSpaceHierarchies):
+
+def time_step_solve_function(State,Mesh,FunctionSpaceHierarchies):
     """
     Hierarchy sets are from last time step. They are the functions as follows:
     dq1,qh,q1,psi0,psi1,q0. Function spaces can be gained from the original heirarchy set ups.
@@ -85,12 +86,12 @@ def time_step_solve_function(State,level_coarse,level_fine,hc,hf,Mesh,FunctionSp
     # Get Function spaces and state
     uh=State.state
     Vcg=FunctionSpaceHierarchies[0]
-    lvlc = level_coarse
-    lvlf = level_fine
+    lvlc = State.levels[0]
+    lvlf = State.levels[1]
     # u derivative
-    dtc = hc
-    dtf = hf
-    xi=Constant(0.0025)
+    dtc = State.hc
+    dtf = State.hf
+    xi=Constant(0.25)
     BM=GenerateRandomGaussianField(Vcg,lvlf,dtf,xi)
     for j in range(2):
         #Predictor stage
@@ -107,49 +108,6 @@ def time_step_solve_function(State,level_coarse,level_fine,hc,hf,Mesh,FunctionSp
     return State
 
 
-
-
-mesh=UnitSquareMesh(2,2)
-
-L=2
-
-n_function_spaces=1
-vec=[0]
-families=['CG']
-degrees=[1]
-
-frame=setup(mesh,L,n_function_spaces,vec,families,degrees)
-
-# Generate the Mesh Hierarchy and the FunctionSpaceHierarchies
-
-frame.GenerateMeshHierarchy()
-frame.GenerateFunctionSpaceHierarchies()
-
-Mesh_Hierarchy=frame.Mesh_Hierarchy
-FunctionSpaceHierarchies=frame.FunctionSpaceHierarchies
-
-# Create Discretization Object
-
-Courant=0.0625
-
-lvlc=0
-lvlf=1
-nc=int(10*2**lvlc)
-nf=int(10*2**lvlf)
-hc=Timestep(nc,Courant).FindStableTimestep()
-hf=Timestep(nf,Courant).FindStableTimestep()
-
-
-
-sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
-
-T=0.0625
-
-ensemble_hierarchy=EnsembleHierarchy()
-
-deg=1
-fam='CG'
-level_to_prolong_to=3
 
 def QoI(solution,lvl_to_prolong_to,desired_family,desired_degree,Mesh_Hierarchy,FunctionSpaceHierarchies,index_of_state=0):
     # create comparison function hierarchies
@@ -171,13 +129,56 @@ def QoI(solution,lvl_to_prolong_to,desired_family,desired_degree,Mesh_Hierarchy,
 
 
 
+problemset=ProblemSet(initial_condition_function,time_step_solve_function,QoI)
+
+
+mesh=UnitSquareMesh(2,2)
+
+L=2
+
+FunctionSpaces=FunctionSpace(mesh,'CG',1)
+
+frame=setup(mesh,L,FunctionSpaces)
+
+# Generate the Mesh Hierarchy and the FunctionSpaceHierarchies
+
+frame.GenerateMeshHierarchy()
+frame.GenerateFunctionSpaceHierarchies()
+
+Mesh_Hierarchy=frame.Mesh_Hierarchy
+FunctionSpaceHierarchies=frame.FunctionSpaceHierarchies
+
+# Create Discretization Object
+
+Courant=0.0625
+
+lvlc=0
+lvlf=1
+nc=int(10*2**lvlc)
+nf=int(10*2**lvlf)
+
+
+
+T=0.0625
+
+ensemble_hierarchy=EnsembleHierarchy()
+
+deg=1
+fam='CG'
+level_to_prolong_to=3
+
+
 
 for i in range(64):
-    sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
+    sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
-    sample.QuantityOfInterest(QoI,level_to_prolong_to,fam,deg,Mesh_Hierarchy)
+    sample.QuantityOfInterest(fam,deg)
     ensemble_hierarchy.AppendToEnsemble(sample.solution,0)
+    print sample.hf
+    print sample.hc
+    print sample.lvlc
+    print sample.lvlf
 
 
 
@@ -185,16 +186,14 @@ lvlc=1
 lvlf=2
 nc=int(10*2**lvlc)
 nf=int(10*2**lvlf)
-hc=Timestep(nc,Courant).FindStableTimestep()
-hf=Timestep(nf,Courant).FindStableTimestep()
 
 
 
 for i in range(16):
-    sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
+    sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
-    sample.QuantityOfInterest(QoI,level_to_prolong_to,fam,deg,Mesh_Hierarchy)
+    sample.QuantityOfInterest(fam,deg)
     ensemble_hierarchy.AppendToEnsemble(sample.solution,1) # try and do this automatically depending on the level (i.e. know where to append into) - given in sample and solution
 
 
@@ -202,16 +201,14 @@ lvlc=2
 lvlf=3
 nc=int(10*2**lvlc)
 nf=int(10*2**lvlf)
-hc=Timestep(nc,Courant).FindStableTimestep()
-hf=Timestep(nf,Courant).FindStableTimestep()
 
 
 
 for i in range(8):
-    sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
+    sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
-    sample.QuantityOfInterest(QoI,level_to_prolong_to,fam,deg,Mesh_Hierarchy)
+    sample.QuantityOfInterest(fam,deg)
     ensemble_hierarchy.AppendToEnsemble(sample.solution,2)
 
 
