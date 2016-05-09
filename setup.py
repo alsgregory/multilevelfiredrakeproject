@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 import versioneer
 
 versioneer.versionfile_source = 'multilevelfiredrakeproject/_version.py'
@@ -8,8 +7,6 @@ versioneer.versionfile_build = 'multilevelfiredrakeproject/_version.py'
 versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'multilevelfiredrakeproject-'
 versioneer.VCS = "git"
-
-
 
 cmdclass = versioneer.get_cmdclass()
 
