@@ -15,6 +15,7 @@ from initialization import setup
 
 from state import state
 
+from version import *
 
 
 

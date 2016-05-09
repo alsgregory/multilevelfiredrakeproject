@@ -115,7 +115,7 @@ L=2
 
 n_function_spaces=1
 vec=[0]
-families=['DG']
+families=['CG']
 degrees=[1]
 
 frame=setup(mesh,L,n_function_spaces,vec,families,degrees)
@@ -130,7 +130,7 @@ FunctionSpaceHierarchies=frame.FunctionSpaceHierarchies
 
 # Create Discretization Object
 
-Courant=0.25
+Courant=0.0625
 
 lvlc=0
 lvlf=1
@@ -143,12 +143,12 @@ hf=Timestep(nf,Courant).FindStableTimestep()
 
 sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
 
-T=0.25
+T=0.0625
 
 ensemble_hierarchy=EnsembleHierarchy()
 
 deg=1
-fam='DG'
+fam='CG'
 level_to_prolong_to=3
 
 def QoI(solution,lvl_to_prolong_to,desired_family,desired_degree,Mesh_Hierarchy,FunctionSpaceHierarchies,index_of_state=0):
@@ -172,7 +172,7 @@ def QoI(solution,lvl_to_prolong_to,desired_family,desired_degree,Mesh_Hierarchy,
 
 
 
-for i in range(8):
+for i in range(64):
     sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
@@ -190,7 +190,7 @@ hf=Timestep(nf,Courant).FindStableTimestep()
 
 
 
-for i in range(8):
+for i in range(16):
     sample = Discretization(lvlc,lvlf,hc,hf,initial_condition_function,time_step_solve_function,Mesh_Hierarchy,FunctionSpaceHierarchies)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
@@ -277,7 +277,7 @@ Bounds.Convergence()
 
 Weights=ensemble_hierarchy.Weights
 N=20
-loc=True
+loc=False
 Sigma=100
 
 Forecast=EnsembleForecast(ensemble_hierarchy,Weights,ensemble_hierarchy._EnsembleHierarchy__OriginalFunctionSpaces[-1][1],N,loc,Sigma)
