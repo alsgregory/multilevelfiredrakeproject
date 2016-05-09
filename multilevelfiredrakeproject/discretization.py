@@ -51,6 +51,14 @@ class ProblemSet():
 
 class Discretization():
     
+    """Class to manage the discretization of one sample of a :class:`state' using a user defined :class:`ProblemSet'
+    
+    	:arg lvlc:
+    	:arg :class:`ProblemSet':
+    	:arg FunctionSpaceHierarchies:
+    	:arg Courant: (optional) Courant number, default 1.0
+    """
+    
     def __init__(self,lvlc,problemset,FunctionSpaceHierarchies,Courant=1.0):
         self.Mesh_Hierarchy=FunctionSpaceHierarchies[0]._mesh_hierarchy
         n00=(self.Mesh_Hierarchy[0].topology.num_cells()/2.0)**(1.0/float(self.Mesh_Hierarchy[0].topology.cell_dimension()))
@@ -67,6 +75,12 @@ class Discretization():
         self.FunctionSpaceHierarchies=FunctionSpaceHierarchies
     
     def Timestepper(self,T): # thus can repeat this instance over and over again with increments of T
+        
+        """This discretizes the :class:`state' until time T
+        
+        	:arg T:
+        """
+        
         # check that initialization has been done
         if hasattr(self.solution,'state')==0:
             raise AttributeError('Discretization Object hasnt been initialized')
@@ -78,6 +92,15 @@ class Discretization():
             self.solution=self.time_step_solve_function(self.solution,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
     
     def QuantityOfInterest(self,desired_family,desired_degree,lvl_to_prolong_to=None,index_of_state=0):
+        
+        """This computes the quantity of interest given a user defined QoI in ProblemSet
+        
+        	:arg desired_family: The family of the finite element of the desired quantity of interest :class:`FunctionSpace'
+        	:arg desired_degree: The degree of the finite element of the desired quantity of interest :class`FunctionSpace'
+        	:arg lvl_to_prolong_to: (optional) default, finest level
+        	:arg index_of_state: (optional) default, 0. Given multiple :class:`Functions' in the :class:`state' this indicates which index of the list the quantity of interest is.
+        """ 
+        
         # own defined default
         if lvl_to_prolong_to==None:
             lvl_to_prolong_to=len(self.Mesh_Hierarchy)-1 # if not specified, go to last level
@@ -85,6 +108,10 @@ class Discretization():
         self.solution.prepared_state=prepared_state.state
     
     def IC(self):
+        
+        """Initializes a :class:`state' ready for discretization
+        """
+        
         self.solution=self.initial_condition_function(self.lvlc,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
         self.solution.lvlf=self.lvlf; self.solution.hf = self.hf
         self.solution.lvlc=self.lvlc; self.solution.hc = self.hc
@@ -93,8 +120,8 @@ class Discretization():
     def FindStableTimestep(self,MeshPoints,Courant):
         """ Finds timstep satisfying stable courant number, given number of cells
         
-        :arg MeshPoints: Number of cells on that level mesh
-        :arg Courant: Courant Number
+        	:arg MeshPoints: Number of cells on that level mesh
+        	:arg Courant: Courant Number
         
         """
         return (Courant / (MeshPoints))

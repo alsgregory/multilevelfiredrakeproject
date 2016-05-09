@@ -13,6 +13,14 @@ from packages import *
 
 
 class state():
+    
+    """Tuple that stores the state :class:`Functions' and properties of them for the coarse (index 0) and fine (index 1) discretizations for a single realisation of the user define system
+    
+    	:arg input_1: Coarse state :class:`Functions' needed for discretization. Can be a list of :class:`Functions'.
+    	:arg input_2: Fine state :class:`Functions' needed for discretization. Can be a list of :class:`Functions'.
+    
+    """
+    
     def __init__(self,input_1,input_2):
         self.state=tuple([input_1,input_2])
         # give the state the attributes the levels of each fine / coarse solution. be careful for lists of states
