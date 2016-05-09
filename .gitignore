@@ -1,0 +1,16 @@
+# ignore pyc files
+
+*.pyc
+
+# ignote project metadata
+
+/*.egg-info
+
+# any compiled test data
+
+*.vtu
+*.pvd
+
+*.log
+
+*.dat
