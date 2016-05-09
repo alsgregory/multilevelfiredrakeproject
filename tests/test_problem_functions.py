@@ -17,10 +17,11 @@ parameters["reorder_meshes"] = False
 from multilevelfiredrakeproject import *
 from firedrake.mg.utils import get_level
 
-def initial_condition_function(level_coarse,level_fine,Mesh,FunctionSpaceHierarchies): # CoarseLevelIndex starts at 0 for L=0 # Random x_spread and y_spread!
+def initial_condition_function(level_coarse,Mesh,FunctionSpaceHierarchies): # CoarseLevelIndex starts at 0 for L=0 # Random x_spread and y_spread!
     VcgH = FunctionSpaceHierarchies[0]
     #VuH = VectorFunctionSpaceHierarchy(Mesh,"DG",1)
     u=FunctionHierarchy(VcgH)
+    level_fine=level_coarse+1
     # now make individual 'sub' hierarchies
     uh=[u[level_coarse],u[level_fine]]
     # Initial Condition

@@ -22,7 +22,6 @@ class ProblemSet():
     	:arg initial_condition_function: an initialization function that outputs a :class:`state'.
     		Subarguments
     		:arg lvlc:
-    		:arg lvlf:
     		:arg :class:`MeshHierarchy':
     		:arg FunctionSpaceHierarchies: User-defined. 
         
@@ -86,7 +85,7 @@ class Discretization():
         self.solution.prepared_state=prepared_state.state
     
     def IC(self):
-        self.solution=self.initial_condition_function(self.lvlc,self.lvlf,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
+        self.solution=self.initial_condition_function(self.lvlc,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
         self.solution.lvlf=self.lvlf; self.solution.hf = self.hf
         self.solution.lvlc=self.lvlc; self.solution.hc = self.hc
         setattr(self.solution,'time',0.0)
