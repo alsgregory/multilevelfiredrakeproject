@@ -1,16 +1,3 @@
-"""
-
-
-Discretization and Implementation
-
-
-Alastair Gregory 2016
-
-
-"""
-
-
-# NOTE UPDATE: NEED TO GET RID OF ANY PALMING LEVEL_COARSE AND LEVEL_FINE IN -> NEED TO USE THE GET_LEVEL FUNCTION THATS NOW IMPORTED INTO PACKAGES THAT CAN BE USED TO GET LEVEL AT ANY TIME
 
 
 from packages import *
@@ -51,12 +38,12 @@ class ProblemSet():
 
 class Discretization():
     
-    """Class to manage the discretization of one sample of a :class:`state' using a user defined :class:`ProblemSet'
+    """Class to manage the discretization of one sample of a :class:`state' using a user defined :class:`ProblemSet'.
     
     	:arg lvlc:
     	:arg :class:`ProblemSet':
     	:arg FunctionSpaceHierarchies:
-    	:arg Courant: (optional) Courant number, default 1.0
+    	:arg Courant: (optional) default=1.0. Courant number.
     """
     
     def __init__(self,lvlc,problemset,FunctionSpaceHierarchies,Courant=1.0):
@@ -76,7 +63,7 @@ class Discretization():
     
     def Timestepper(self,T): # thus can repeat this instance over and over again with increments of T
         
-        """This discretizes the :class:`state' until time T
+        """This discretizes the :class:`state' until time T.
         
         	:arg T:
         """
@@ -93,12 +80,12 @@ class Discretization():
     
     def QuantityOfInterest(self,desired_family,desired_degree,lvl_to_prolong_to=None,index_of_state=0):
         
-        """This computes the quantity of interest given a user defined QoI in ProblemSet
+        """This computes the quantity of interest given a user defined QoI in ProblemSet.
         
         	:arg desired_family: The family of the finite element of the desired quantity of interest :class:`FunctionSpace'
         	:arg desired_degree: The degree of the finite element of the desired quantity of interest :class`FunctionSpace'
-        	:arg lvl_to_prolong_to: (optional) default, finest level
-        	:arg index_of_state: (optional) default, 0. Given multiple :class:`Functions' in the :class:`state' this indicates which index of the list the quantity of interest is.
+        	:arg lvl_to_prolong_to: (optional) default=finest level
+        	:arg index_of_state: (optional) default=0. Given multiple :class:`Functions' in the :class:`state' this indicates which index of the list the quantity of interest is.
         """ 
         
         # own defined default
@@ -109,7 +96,7 @@ class Discretization():
     
     def IC(self):
         
-        """Initializes a :class:`state' ready for discretization
+        """Initializes a :class:`state' ready for discretization.
         """
         
         self.solution=self.initial_condition_function(self.lvlc,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
@@ -118,7 +105,7 @@ class Discretization():
         setattr(self.solution,'time',0.0)
     
     def FindStableTimestep(self,MeshPoints,Courant):
-        """ Finds timstep satisfying stable courant number, given number of cells
+        """ Finds timstep satisfying stable courant number, given number of cells.
         
         	:arg MeshPoints: Number of cells on that level mesh
         	:arg Courant: Courant Number

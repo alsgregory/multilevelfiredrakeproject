@@ -1,10 +1,5 @@
-"""
 
-Ensemble Type Module
 
-Alastair Gregory 2016
-
-"""
 from packages import *
 
 

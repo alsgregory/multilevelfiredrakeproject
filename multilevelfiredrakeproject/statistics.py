@@ -1,12 +1,3 @@
-"""
-
-
-Statistics
-
-
-Alastair Gregory 2016
-
-"""
 
 from packages import *
 

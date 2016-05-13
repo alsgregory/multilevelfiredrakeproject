@@ -1,10 +1,5 @@
-"""
 
-Prolong and Injecting
 
-Alastair Gregory 2016
-
-"""
 from packages import *
 
 # Make sure that we don't explicitely take as arguments the levels of these functions as we can just work these out from get_levels. Remember warnings about is they are part of hierarchy or not!!!! -> test this!
