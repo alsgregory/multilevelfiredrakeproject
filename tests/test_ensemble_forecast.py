@@ -18,8 +18,7 @@ ensemble_case_example = make_ensemble()
 Save=CopyEnsembleHierarchy(ensemble_case_example).Copy
 
 def test_ensemble_forecast(ensemble_case_example):
-    N=10
-    forecast=EnsembleForecast(ensemble_case_example,ensemble_case_example.Weights,ensemble_case_example._EnsembleHierarchy__OriginalFunctionSpaces[-1][1],N)
+    forecast=EnsembleForecast(ensemble_case_example,ensemble_case_example._EnsembleHierarchy__OriginalFunctionSpaces[-1][1])
     return forecast
 
 

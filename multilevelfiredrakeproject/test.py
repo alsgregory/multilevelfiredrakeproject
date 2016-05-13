@@ -278,7 +278,7 @@ N=20
 loc=False
 Sigma=100
 
-Forecast=EnsembleForecast(ensemble_hierarchy,Weights,ensemble_hierarchy._EnsembleHierarchy__OriginalFunctionSpaces[-1][1],N,loc,Sigma)
+Forecast=EnsembleForecast(ensemble_hierarchy,ensemble_hierarchy._EnsembleHierarchy__OriginalFunctionSpaces[-1][1],N,loc,Sigma)
 
 Forecast.EnsembleTransfer('Data')
 

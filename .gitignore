@@ -1,3 +1,12 @@
+# ignore directories
+
+/build
+/source
+*.bat
+Makefile
+
+
+
 # ignore pyc files
 
 *.pyc

@@ -1,16 +1,36 @@
-"""
 
-
-Ensemble Forecasting
-
-
-Alastair Gregory
-
-"""
 from packages import *
 
 class EnsembleForecast():
-    def __init__(self,EnsembleHierarchy,Weights,DesiredFunctionSpace,N,localisation=False,Sigma=1):
+    
+    """This generates a N member :attr:`Forecast` from a :class:`EnsembleHierarchy`. 
+    
+    	
+    	:param EnsembleHierarchy: The :class:`EnsembleHierarchy` one wants to derive the forecast from.
+    	
+    	:type EnsembleHierarchy: :class:`EnsembleHierarchy`
+    	
+    	:param  DesiredFunctionSpace: A :class:`FunctionSpace` that one wants :attr:`Forecast` members to exist on.
+    	
+    	:type DesiredFunctionSpace: :class:`FunctionSpace`
+    	
+    	:param  N: :attr:`Forecast` size.
+    	
+    	:type N: int
+    	
+    	:param  localisation: Whether to localise covariance matrix or not.
+    	
+    	:type localisation: boolean
+    	
+    	:param  Sigma: Localisation parameter to taper covariance matrix with. Covariance matrix will to be element-by-element multiplied with ( exp(-Distance/Sigma) ) where Distance is the eucldiean distances of elements from local element.
+    	
+    	:type Sigma: float
+    	
+    		
+
+    """
+    
+    def __init__(self,EnsembleHierarchy,DesiredFunctionSpace,N=None,localisation=False,Sigma=1):
         self.__OriginalFunctionSpace = EnsembleHierarchy._EnsembleHierarchy__OriginalFunctionSpaces[-1][1]
         # Needs to be in Data Type
         if EnsembleHierarchy.Type!="Data":
@@ -27,11 +47,14 @@ class EnsembleForecast():
                 NE[i].append(self.__FlattenMultiD(EnsembleHierarchy.Ensemble[i][j]))
         self.Ensemble=NE
         # Define forecast ensemble size
-        self.N=N
-        self.Weights=Weights
+        if N==None:
+            self.N=np.shape(self.Ensemble[0][0])[-1]
+        else:
+            self.N=N
+        self.Weights=EnsembleHierarchy.Weights
         self.dimension_of_state_space=self.__OriginalFunctionSpace.mesh().geometric_dimension()
         self.localisation=localisation
-        ''' Need OriginalFunctionSpace to be DG if want to use localisation OR NON-VECTOR!! '''
+        # Need OriginalFunctionSpace to be DG if want to use localisation OR NON-VECTOR!!
         if self.localisation==True:
             if self.__OriginalFunctionSpace.ufl_element().family()=='Lagrange' or self.__OriginalFunctionSpace.ufl_element().value_size()>1:
                 raise ValueError('Cannot use localisation with CG or Vector elements. Please convert to DG (and non-vector) and change DesiredFunctionSpace to CG (or vector) as to revert back')
@@ -46,7 +69,7 @@ class EnsembleForecast():
         #self.c=np.cov(self.Ensembles[-1][1])
         self.__S=SpatialPostProcessing(self.Grid,self.dimension_of_state_space,self.Cov,self.N,self.localisation,self.Sigma)
         self.DesiredFunctionSpace = DesiredFunctionSpace
-        self.Forecast=self.__GenerateEnsemble()
+        self.Forecast=self.__GenerateEnsemble() #: :attr:`list` of Forecast members
         self.Type='Function' # Default type after generated enssemble
         # convert back to function
         if transfered==1:
@@ -58,20 +81,17 @@ class EnsembleForecast():
             for j in range(len(self.Ensemble[i])):
                 AE[i].append(self.__ReturnMultiD(self.Ensemble[i][j],self.requiredshape))
         self.Ensemble=AE
+    
+    
     def __WeightedSampleQuantile(self,u,X,W):
-        """ Finds the consistent approximation to the quantile function F^(-1)(u)=x where u~U[0,1], x~X, for given u 
-        Inputs:
-        - u, uniform sample, numpy array
-        - X, numpy array sized N
-        Ouputs:
-        - x, numpy array of approximations to F^(-1)(u)
-        """
         A=np.argsort(X)
         x=np.sort(X)
         w=W[A.astype(int)]
         CW=np.cumsum(w)
         i=np.searchsorted(CW,u)
         return x[i.astype(int)]
+    
+    
     def __IterativeDistance(self,U,f,index):
 		# project into DG0
 		old_degree=f.function_space().ufl_element().degree()
@@ -107,8 +127,10 @@ class EnsembleForecast():
 		distance=np.ones(len(F_new.dat.data))-np.divide(F_new.dat.data,F_new.dat.data[index]*np.ones(len(F_new.dat.data)))
 		distance=np.multiply(distance,(distance>=0))
 		return distance
+    
+    
     def __GenerateDistanceGrid(self):
-        ''' Only in DG and non-vector '''
+        # Only in DG and non-vector
         # mesh
         U=self.__OriginalFunctionSpace.mesh()
         n=len(self.Ensemble[-1][1][:,0])
@@ -118,7 +140,16 @@ class EnsembleForecast():
             f.dat.data[i]=1.0
             distance[i,:]=self.__IterativeDistance(U,f,i)
         return distance
+    
+    
     def EnsembleTransfer(self,To):
+        """This transfers an EnsembleForecast between types 'Data' and 'Function'.
+        
+        	:param To: The :attr:`type` one wants to transfer :attr:`Forecast` to: 'Data' or 'Function'.
+        	
+        	:type To: string
+        
+        """
         if To==self.Type:
             ''' nothing happens '''
         if To!=self.Type:
@@ -132,6 +163,8 @@ class EnsembleForecast():
             if To=='Function':
                 self.Forecast=self.__RevertEnsemble(self.Forecast)
                 self.Type='Function'
+    
+    
     def __MLMCCovariance(self,Ensembles):
         for i in range(len(Ensembles)):
             if i==0:
@@ -139,16 +172,16 @@ class EnsembleForecast():
             else:
                 C+=np.cov(Ensembles[i][1])-np.cov(Ensembles[i][0])
         return C
+    
+    
     def __FlattenMultiD(self,MultiDArray):
-        """
-        Turns a greater than 2 dimension (D x ... x D x N) numpy array into a (D x N) flattened array
-        """
         FlattenedArray=np.zeros((np.prod(np.shape(MultiDArray[...,0])),np.shape(MultiDArray)[-1]))
         for i in range(np.shape(MultiDArray)[-1]):
             FlattenedArray[:,i]=np.ravel(MultiDArray[...,i],order='C')
         return FlattenedArray
+    
+    
     def __RevertEnsemble(self,GridEnsemble):
-        """ Transfers an ensemble forecast D x N back into functions, given the level of the hierarchy it's on """
         FunctionForecasts=[] # LIST
         for i in range(len(GridEnsemble[0,:])):
             # revert back to old fs.
@@ -159,13 +192,9 @@ class EnsembleForecast():
             FNew.project(F)
             FunctionForecasts.append(FNew)
         return FunctionForecasts
+    
+    
     def __ReturnMultiD(self,FlattenedArray,requiredshape):
-        """
-        Returns a flattened array back to multi d
-        Inputs:
-        - FlattenedArray (D x N)
-        - requiredshape tuple>=2
-        """
         l=list(requiredshape)
         l.append(len(FlattenedArray[0,:]))
         R=tuple(l)
@@ -173,6 +202,8 @@ class EnsembleForecast():
         for i in range(np.shape(FlattenedArray)[-1]):
             Array[...,i]=np.reshape(FlattenedArray[:,i],(requiredshape),order='C')
         return Array
+    
+    
     def __GenerateEnsemble(self): 
         n=len(self.Ensemble[0][0][0,:]) # size of new single ensemble (desired)
         L=len(self.Ensemble)
@@ -206,16 +237,18 @@ class EnsembleForecast():
 
 
 class SpatialPostProcessing():
+    
     def __init__(self,Grid,Dimension,CovarianceMatrix,N,T=False,Sigma=1):
         self.dimension_of_state_space=Dimension
         self.Grid=Grid
-        ''' This grid is either a tuple of 2d grids or an array 1 grid '''
+        #  This grid is either a tuple of 2d grids or an array 1 grid
         self.C=CovarianceMatrix
         self.Sigma=Sigma
         self.T=T
         self.N=N
+    
+    
     def __Tapering(self,C):
-        """ Tapering method - Bickel et al 2008 """
         # Define distance matrix, only works for 1 and 2 dimension of state space.
         Distance=self.Grid
         # Checks if one needs to taper
@@ -227,22 +260,13 @@ class SpatialPostProcessing():
         else:
             raise ValueError('Option to taper needs to be Boolean type')
         return Regularized
+    
+    
     def __Shrink(self,C,delta):
-        """ Shrinking of an approximation to a correlation matrix, to guarantee that it is positive definite (Nick Highman 2014). Target is the identity
-        Inputs:
-        - C, Correlation Matrix
-        - delta, Found by the bisection method
-        Ouputs:
-        - Shrunk correlation matrix, positive definite
-        """
         return (delta*C)+((1-delta)*np.identity(len(C[0,:])))
+    
+    
     def __bisectionmethod(self,C):
-        """ Finds optimal delta, that allows C to be positive definite under shrinking (Nick Highman 2014)
-        Inputs:
-        - C, Correlation Matrix
-        Outputs:
-        - Delta, to be used in Shrinking Function
-        """
         al=0.0; ar=1.0; epsilon=1e-6
         if np.all(np.linalg.eigh(self.__Shrink(C,1))[0]>0)==1: # initial check
             return 1
@@ -253,8 +277,9 @@ class SpatialPostProcessing():
             else:
                 ar=am
         return al
+    
+    
     def __JointNormalTransform(self):
-        """ This samples N Uniform points to invert marginals! """
         # convert into standard normal - correlation matrix!
         print colored('Finding delta needed to shrink mutlilevel covariance...')
         # Carry out localisation and shrinking to guarantee Pos Def - Print Delta needed!
