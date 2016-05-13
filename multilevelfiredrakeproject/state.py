@@ -16,6 +16,8 @@ class state():
     def __init__(self,input_1,input_2):
         self.state=tuple([input_1,input_2]) #: :attr:`tuple` of coarse and fine state :class:`Function`
         # give the state the attributes the levels of each fine / coarse solution. be careful for lists of states.
+        # preallocate prepared state
+        self.prepared_state=None
         if type(self.state) is list:
             self.levels=tuple([get_level(self.state[0][0])[1],get_level(self.state[1][0])[1]]) #: the levels corresponding to the coarse and fine state :class:`Function`.
         else:

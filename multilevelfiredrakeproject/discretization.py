@@ -4,28 +4,29 @@ from packages import *
 
 class ProblemSet():
     
-    """Takes in 3 user defined :class:`Function' that defines the uncertainty quantification problem.
+    """Takes in 3 user defined :attr:`function` that defines the uncertainty quantification problem.
     
-    	:arg initial_condition_function: an initialization function that outputs a :class:`state'.
-    		Subarguments
-    		:arg lvlc:
-    		:arg :class:`MeshHierarchy':
-    		:arg FunctionSpaceHierarchies: User-defined. 
-        
-        :arg time_step_solve_function: a timestep function that outputs a :class:`state'
-        	Subarguments
-        	:arg :class:`state':
-        	:arg MeshHierarchy:
-        	:arg FunctionSpaceHierarchies: User-defined. 
-        
-        :arg quantity_of_interest: a quantity of interest function that outputs a :class:`state.prepared_state'
-        	Subarguments
-        	:arg :class:`state':
-        	:arg lvl_to_prolong_to: This is the level that :class:`state.prepared_state' will be on
-        	:arg desired_family:
-        	:arg desired_degree:
-        	:arg :class:`MeshHierarchy':
-        	:arg FunctionSpaceHierarchies: User-defined
+    	:param initial_condition_function: An initialization function that only outputs a :class:`state`.
+    	
+    	:type initial_condition_function: function, args: lvlc,:class:`MeshHierarchy`,FunctionSpaceHierarchies
+    	
+    		:param FunctionSpaceHierarchies: A list of multiple :class:`FunctionSpaceHierarchy`.
+    		:type FunctionSpaceHierarchies: list
+    	
+    	:param time_step_solve_function: A timestep function that only outputs a :class:`state`.
+    	:type time_step_solve_function: function, args: :class:`state`,:class:`MeshHierarchy`,FunctionSpaceHierarchies
+    	
+    	:param quantity_of_interest: A quantity of interest function that only outputs a :attr:`prepared_state'
+    	:type quantity_of_interest: function(:class:`state`,lvl_to_prolong_to,desired_family,desired_degree,:class:`MeshHierarchy`,FunctionSpaceHierarchies)
+    		
+    		:param lvl_to_prolong_to: Level to prolong functions from different levels to in quantity of interest. e.g. typically the finest level.
+    		:type lvl_to_prolong_to: int
+    		
+    		:param desired_family: Family of Finite Element for the desired :class:`FunctionSpace` for the quantity of interest :class:`Function` to exist on.
+    		:type desired_family: string
+    		
+    		:param desired_degree: Degree of Finite Element for the desired :class:`FunctionSpace` for the quantity of interest :class:`Function` to exist on.
+    		:type desired_degree: string
         
         """
     
@@ -77,6 +78,9 @@ class Discretization():
         for _ in range(Nt): # THIS HAS BEEN CHANGED!! TIMESTEP WAS ONE TOO MANY - INCONSISTENT!
             self.solution.time+=self.hc # update time
             self.solution=self.time_step_solve_function(self.solution,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
+            # check for type
+            if hasattr(self.solution,'state')!=1:
+                raise TypeError('Output from time_step_solve_function is not of state type')
     
     def QuantityOfInterest(self,desired_family,desired_degree,lvl_to_prolong_to=None,index_of_state=0):
         
@@ -86,6 +90,7 @@ class Discretization():
         	:arg desired_degree: The degree of the finite element of the desired quantity of interest :class`FunctionSpace'
         	:arg lvl_to_prolong_to: (optional) default=finest level
         	:arg index_of_state: (optional) default=0. Given multiple :class:`Functions' in the :class:`state' this indicates which index of the list the quantity of interest is.
+        	
         """ 
         
         # own defined default
@@ -100,6 +105,9 @@ class Discretization():
         """
         
         self.solution=self.initial_condition_function(self.lvlc,self.Mesh_Hierarchy,self.FunctionSpaceHierarchies)
+        # Test the output
+        if hasattr(self.solution,'state')!=1:
+            raise TypeError('Output from initial_condition_function is not of state type')
         self.solution.lvlf=self.lvlf; self.solution.hf = self.hf
         self.solution.lvlc=self.lvlc; self.solution.hc = self.hc
         setattr(self.solution,'time',0.0)
@@ -107,8 +115,11 @@ class Discretization():
     def FindStableTimestep(self,MeshPoints,Courant):
         """ Finds timstep satisfying stable courant number, given number of cells.
         
-        	:arg MeshPoints: Number of cells on that level mesh
-        	:arg Courant: Courant Number
+        	:param MeshPoints: Number of cells on that level mesh.
+        	:type MeshPoints: int
+        	
+        	:param Courant: Courant Number.
+        	:type Courant: float
         
         """
         return (Courant / (MeshPoints))

@@ -39,7 +39,7 @@ def initial_condition_function(level_coarse,Mesh,FunctionSpaceHierarchies): # Co
     # now make individual 'sub' hierarchies
     uh=[u[level_coarse],u[level_fine]]
     # Initial Condition
-    xc=np.random.normal(0.0,0.1,1)
+    xc=np.random.normal(0.0,0.05,1)
     uh[0].interpolate(Expression("exp(-(pow((x[0]-0.5+x_center),2)/0.25)-(pow(x[1]-0.5,2)/0.25))",x_center=xc))
     uh[1].interpolate(Expression("exp(-(pow((x[0]-0.5+x_center),2)/0.25)-(pow(x[1]-0.5,2)/0.25))",x_center=xc))
     # generate a state object here
@@ -52,7 +52,8 @@ def f(u,v,lvl,h,BM):
     u_ = TrialFunction(Vcg[lvl])
     # get information about the level, timestep and dx
     dt = h
-    a=(dt*dot(grad(v),grad(u_)) + v*u_)*dx # remember to multiply Laplacian by mu and dt
+    perp=lambda u: as_vector((u,u))
+    a=(dt*dot(grad(v),grad(u_)) + v*u_)*dx - Constant(0.5)*dt*dot(perp(v),grad(u_))*dx # remember to multiply Laplacian by mu and dt
     L=(u+BM)*v*dx # RHS is function on RHS of Helmholtz
     u_new=FunctionHierarchy(Vcg)[lvl]
     u_problem = LinearVariationalProblem(a,L,u_new)
@@ -92,7 +93,7 @@ def time_step_solve_function(State,Mesh,FunctionSpaceHierarchies):
     # u derivative
     dtc = State.hc
     dtf = State.hf
-    xi=Constant(0.25)
+    xi=Constant(0.005)
     BM=GenerateRandomGaussianField(Vcg,lvlf,dtf,xi)
     for j in range(2):
         #Predictor stage
@@ -170,7 +171,7 @@ level_to_prolong_to=3
 
 
 
-for i in range(64):
+for i in range(512):
     sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
@@ -190,7 +191,7 @@ nf=int(10*2**lvlf)
 
 
 
-for i in range(16):
+for i in range(256):
     sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
@@ -205,12 +206,14 @@ nf=int(10*2**lvlf)
 
 
 
-for i in range(8):
+for i in range(128):
     sample = Discretization(lvlc,problemset,FunctionSpaceHierarchies,Courant)
     sample.IC()
     sample.Timestepper(T) # if we wanted to do something to state (importance sampling etc), we can now, then continue with state
     sample.QuantityOfInterest(fam,deg)
     ensemble_hierarchy.AppendToEnsemble(sample.solution,2)
+
+
 
 
 
@@ -238,7 +241,6 @@ SampleStatistics(ensemble_hierarchy)
 
 print 'mean: ', np.linalg.norm(ensemble_hierarchy.Mean[0]),np.linalg.norm(ensemble_hierarchy.Mean[1]), np.linalg.norm(ensemble_hierarchy.Mean[2])
 print 'variance: ', np.linalg.norm(ensemble_hierarchy.Variance[0]),np.linalg.norm(ensemble_hierarchy.Variance[1]), np.linalg.norm(ensemble_hierarchy.Variance[2])
-
 
 MLMCMean=ensemble_hierarchy.MultilevelExpectation
 
@@ -274,7 +276,7 @@ Bounds.Convergence()
 
 
 Weights=ensemble_hierarchy.Weights
-N=20
+N=256
 loc=False
 Sigma=100
 
@@ -301,8 +303,8 @@ delta=Forecast.Delta
 Forecast.EnsembleTransfer('Function')
 
 FileMember = File("ensemble_member_q.pvd")
-Forecast.Forecast[1].rename('function')
-FileMember << Forecast.Forecast[1]
+Forecast.Forecast[3].rename('function')
+FileMember << Forecast.Forecast[5]
 
 ensemble_hierarchy.EnsembleTransfer('Function')
 MLMCMean=ensemble_hierarchy.MultilevelExpectation
@@ -317,8 +319,27 @@ FileMember << MLMCMean
 
 dir(ensemble_hierarchy)
 
+# coverage
+
+c=0
+for i in range(N):
+    if Forecast.Forecast[i].at([1,0])>0.55 and Forecast.Forecast[i].at([0,1])<0.55:
+        c+=1
+        print c
 
 
+ensemble_hierarchy.EnsembleTransfer('Function')
+
+c_standard=0
+for i in range(len(ensemble_hierarchy.Ensemble[-1])):
+    if ensemble_hierarchy.Ensemble[-1][i][1].at([1,0])>0.55 and ensemble_hierarchy.Ensemble[-1][i][1].at([0,1])<0.55:
+        c_standard+=1
+        print c_standard
+
+
+p_c=c/N
+
+p_c_standard=c_standard/len(ensemble_hierarchy.Ensemble[-1])
 
 
 
