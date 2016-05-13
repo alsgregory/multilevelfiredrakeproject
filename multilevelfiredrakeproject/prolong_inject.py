@@ -8,10 +8,17 @@ from packages import *
 class ProlongInject():
     
     
-    """ Contains methods that are used for iteratively prolonging and inject coarse / fine :class:`Functions' up more than one level"""
+    """ Contains methods that are used for iteratively prolonging and inject coarse / fine :class:`Function` up more than one level"""
     
     
     def __TurnHierarchyIntoItemList(self,Hierarchy):
+        
+        """Turns a :class:`FunctionHierarchy` into a list of individual :class:`Function` of the same :class:`FunctionSpace`.
+        
+        	:param Hierarchy: This is the :class:`FunctionHierarchy` one wants to turn into a list.
+        	:type Hierarchy: :class:`FunctionHierarchy`
+        
+        """
         
         L=len(Hierarchy)
         List=[]
@@ -22,10 +29,13 @@ class ProlongInject():
     
     def ProlongUpToFinestLevel(self,Function,Hierarchy):
         
-        """Prolongs any :class:`Function' in a :class:`FunctionHierarchy' from level :arg CoarseIndex: to the finest level in the empty output :class:`FunctionHierarchy'
+        """Prolongs any :class:`Function` in a :class:`FunctionHierarchy` to the finest level in the empty output :class:`FunctionHierarchy`
         
-        	:arg :class:`Function:
-        	:arg :class:`FunctionHierarchy': To inset the prolonged :class:`Function' into
+        	:param Function: The :class:`Function` one wants to prolong.
+        	:type Function: :class:`Function`
+        	
+        	:param Hierarchy: To inset the prolonged :class:`Function` into.
+        	:type Hierarchy: :class:`FunctionHierarchy`
         
         """
         
@@ -44,11 +54,16 @@ class ProlongInject():
     
     def ProlongUpToAnyLevel(self,Level_to_prolong_to,Function,Hierarchy): 
         
-        """Prolongs any :class:`Function' in a :class:`FunctionHierarchy' from level :arg CoarseIndex: to the level :arg Level_to_prolong_to: in the empty output :class:`FunctionHierarchy'
+        """Prolongs any :class:`Function` in a :class:`FunctionHierarchy` to the prescribed level in the empty output :class:`FunctionHierarchy`
         
-        	:arg Level_to_prolong_to:
-        	:arg :class:`Function:
-        	:arg :class:`FunctionHierarchy': To inset the prolonged :class:`Function' into
+        	:param Level_to_prolong_to: The level to prolong :class`Function` to.
+        	:type Level_to_prolong_to: int
+        	
+        	:param Function: The :class:`Function` one wishes to prolong.
+        	:type Function: :class:`Function`
+        	
+        	:param Hierarchy: To inset the prolonged :class:`Function` into.
+        	:type Hierarchy: :class:`FunctionHierarchy`
         
         """
         
@@ -69,11 +84,16 @@ class ProlongInject():
     
     def InjectDownToAnyLevel(self,Level_to_inject_to,Function,Hierarchy): 
         
-        """Injects any :class:`Function' in a :class:`FunctionHierarchy' from level :arg FineIndex: to the level :arg Level_to_inject_to: in the empty output :class:`FunctionHierarchy'
+        """Injects any :class:`Function` in a :class:`FunctionHierarchy` to the prescribed level in the empty output :class:`FunctionHierarchy`.
         
-        	:arg Level_to_inject_to:
-        	:arg :class:`Function:
-        	:arg :class:`FunctionHierarchy': To inset the injected :class:`Function' into
+        	:param Level_to_inject_to: The level to inject :class:`Function` to.
+        	:type Level_to_inject_to: int
+        	
+        	:param Function: The :class:`Function` one wishes to inject
+        	:type Function: :class:`Function`
+        	
+        	:param Hierarchy: To inset the injected :class:`Function` into
+        	:type Hierarchy: :class:`FunctionHierarchy`
         
         """
         

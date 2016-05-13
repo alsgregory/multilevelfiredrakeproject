@@ -29,6 +29,10 @@ class EnsembleHierarchy():
     
     def __SameFunctionSpaceErrorCheck(self):
         
+        """Checks if all the functions in the ensemble hierarchy exist on the same function space
+        
+        """
+        
         Comparison=len(self.Ensemble[0][0][0].dat.data)
         for i in range(len(self.Ensemble)):
             for j in range(len(self.Ensemble[i])):
@@ -39,6 +43,17 @@ class EnsembleHierarchy():
     
     def AppendToEnsemble(self,tuple_to_append,Level_to_append_to):
         
+        """Appends a prepared state to the defined level of the ensemble hierarchy.
+        
+        	:param tuple_to_append: The prepared state.
+        	:type tuple_to_append: :attr:`state.prepared_state'
+        	
+        	:param Level_to_append_to: The index of the ensemble hierarchy to append the prepared state to. If this is greater than the current number of levels of the hierarchy, a new level will be made.
+        	:type Level_to_append_to: int
+        
+        
+        """ 
+        
         if hasattr(tuple_to_append,'prepared_state')==0:
             raise AttributeError('State hasnt been prepared for appedning into ensemble hierarchy')
         else:
@@ -48,6 +63,8 @@ class EnsembleHierarchy():
             raise ValueError('Cant append to level more than 1 above EnsembleHierarchy.L')
         #try:
         if Level_to_append_to<len(self.Ensemble):
+            if type(tuple_to_append.prepared_state[0])!=Function:
+                raise TypeError('The prepared state does not consist of Function types')
             self.Ensemble[Level_to_append_to].append(tuple_to_append.prepared_state)
             self.__SameFunctionSpaceErrorCheck() # check for all same function space
             self.Weights[Level_to_append_to]=tuple([np.ones(len(self.Ensemble[Level_to_append_to]))*(1/float(len(self.Ensemble[Level_to_append_to]))),np.ones(len(self.Ensemble[Level_to_append_to]))*(1/float(len(self.Ensemble[Level_to_append_to])))])
@@ -64,6 +81,13 @@ class EnsembleHierarchy():
     
     
     def EnsembleTransfer(self,To="Data"):
+        
+        """Transfers the type of the :class:`EnsembleHierarchy` between 'Data' and 'Function'.
+        
+        	:param To: The :attr:`Type` one wants to transfer the :class:`EnsembleHierarchy` to: 'Data' or 'Function'.
+        	:type To: string 
+        
+        """
         
         if self.Type!=To: # only change type if not already that
             if To=="Data":
@@ -101,8 +125,15 @@ class EnsembleHierarchy():
         
 class CopyEnsembleHierarchy():
     
+    """Makes a copy :attr:`CopyEnsembleHierarchy.Copy` of a prescribed :class:`EnsembleHierarchy`.
+    
+    	:param EnsembleHierarchy: The :class:`EnsembleHierarchy` one wants to copy.
+    	:type EnsembleHierarchy: :class:`EnsembleHierarchy`
+    
+    """
+    
     def __init__(self,Ensemble_Hierarchy):
-        self.Copy=EnsembleHierarchy()
+        self.Copy=EnsembleHierarchy() #: Copy of the :class:`EnsembleHierarchy`.
         self.Copy.__dict__.update(Ensemble_Hierarchy.__dict__)
 
 
