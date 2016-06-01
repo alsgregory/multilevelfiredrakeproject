@@ -5,13 +5,7 @@ from packages import *
 # Make sure that we don't explicitely take as arguments the levels of these functions as we can just work these out from get_levels. Remember warnings about is they are part of hierarchy or not!!!! -> test this!
 
 
-class ProlongInject():
-    
-    
-    """ Contains methods that are used for iteratively prolonging and inject coarse / fine :class:`Function` up more than one level"""
-    
-    
-    def __TurnHierarchyIntoItemList(self,Hierarchy):
+def TurnHierarchyIntoItemList(Hierarchy):
         
         """Turns a :class:`FunctionHierarchy` into a list of individual :class:`Function` of the same :class:`FunctionSpace`.
         
@@ -27,7 +21,7 @@ class ProlongInject():
         return List
     
     
-    def ProlongUpToFinestLevel(self,Function,Hierarchy):
+def ProlongUpToFinestLevel(Function,Hierarchy):
         
         """Prolongs any :class:`Function` in a :class:`FunctionHierarchy` to the finest level in the empty output :class:`FunctionHierarchy`
         
@@ -42,7 +36,7 @@ class ProlongInject():
         CoarseIndex=get_level(Function)[1]
         if CoarseIndex==-1:
             raise IndexError('Coarse Index is not an index one can prolong from. Function is not in a hierarchy')
-        Hier=self.__TurnHierarchyIntoItemList(Hierarchy)
+        Hier=TurnHierarchyIntoItemList(Hierarchy)
         Hier[CoarseIndex]=Function
         if CoarseIndex==len(Hierarchy):
             Hier[-1]=Function
@@ -52,7 +46,7 @@ class ProlongInject():
         return Hierarchy[-1]
     
     
-    def ProlongUpToAnyLevel(self,Level_to_prolong_to,Function,Hierarchy): 
+def ProlongUpToAnyLevel(Level_to_prolong_to,Function,Hierarchy): 
         
         """Prolongs any :class:`Function` in a :class:`FunctionHierarchy` to the prescribed level in the empty output :class:`FunctionHierarchy`
         
@@ -72,7 +66,7 @@ class ProlongInject():
             raise IndexError('Coarse Index is not an index one can prolong from. Function is not in a hierarchy')
         if CoarseIndex>Level_to_prolong_to:
             raise ValueError('Cant prolong to level less than current')
-        Hier=self.__TurnHierarchyIntoItemList(Hierarchy)
+        Hier=TurnHierarchyIntoItemList(Hierarchy)
         Hier[CoarseIndex]=Function
         if CoarseIndex==Level_to_prolong_to: # this is the same as Level_to_prolong_to
             Hier[Level_to_prolong_to]=Function
@@ -82,7 +76,7 @@ class ProlongInject():
         return Hierarchy[Level_to_prolong_to]
     
     
-    def InjectDownToAnyLevel(self,Level_to_inject_to,Function,Hierarchy): 
+def InjectDownToAnyLevel(Level_to_inject_to,Function,Hierarchy): 
         
         """Injects any :class:`Function` in a :class:`FunctionHierarchy` to the prescribed level in the empty output :class:`FunctionHierarchy`.
         
@@ -102,7 +96,7 @@ class ProlongInject():
             raise IndexError('Fine Index is not an index one can inject from. Function is not in a hierarchy')
         if FineIndex<Level_to_inject_to:
             raise ValueError('Cant inject to level greater than current')
-        Hier=self.__TurnHierarchyIntoItemList(Hierarchy)
+        Hier=TurnHierarchyIntoItemList(Hierarchy)
         Hier[FineIndex]=Function
         if FineIndex==Level_to_inject_to: 
             Hier[Level_to_inject_to]=Function

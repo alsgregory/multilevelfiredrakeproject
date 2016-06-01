@@ -3,48 +3,52 @@ from packages import *
 
 ''' Need to make ErrorBounding() take Firedrake Functions '''
 
-class ErrorBounding():
-    def __init__(self,EnsembleHierarchy,Eps,gamma=1):
-        self.__E = EnsembleHierarchy
-        self.Eps=Eps
-        self.gamma=gamma
-        if hasattr(self.__E,'Mean')==0:
-            raise AttributeError('EnsembleHierarchy Does Not Have Sample Statistics As Attribute')
-        if hasattr(self.__E,'Variance')==0:
-            raise AttributeError('EnsembleHierarchy Does Not Have Sample Statistics As Attribute')
-        ''' Check that the SampleStats have been updated to new EnsembleHierarchy.Type '''
-        if self.__E.Type=='Data':
-            from firedrake import *
-            if type(self.__E.Mean[0])==Function:
-                raise ValueError('Update SampleStatistics for new EnsembleHierarchy.Type')
-        if self.__E.Type=='Function':
-            if type(self.__E.Mean[0])!=Function:
-                raise ValueError('Update SampleStatistics for new EnsembleHierarchy.Type')
-    def OptimalNl(self):
-        # Make traces of covariance matricies
-        if self.__E.Type=="Data":
-            Tl=[]
-            for i in range(self.__E.L):
-                Tl.append(np.linalg.norm(self.__E.Variance[i]))
-                ''' have to change what this norm is to make it same as UFL norm '''
-        if self.__E.Type=="Function":
-            Tl=[]
-            for i in range(self.__E.L):
-                Tl.append(norm(self.__E.Variance[i]))
-        # Generate optimal Nl
-        HL=np.array(self.__E.hl)
-        VL=np.array(Tl)
-        Nl=np.ceil(np.multiply(np.sqrt(np.multiply(VL,HL**self.gamma)),((2*np.sum(np.sqrt(np.divide(VL,HL**self.gamma))))/(self.Eps**2)))) # EDITED
-        return Nl
-    def Convergence(self):
-        if self.__E.Type=="Data":
-            EstBias=np.linalg.norm(self.__E.Mean[-1])
-            ''' have to change what this norm is to make it same as UFL norm '''
-        if self.__E.Type=="Function":
-            EstBias=norm(self.__E.Mean[-1])
-        # Try the max of this El array
-        Con=EstBias<((self.__E.M-1)*self.Eps)/np.sqrt(2)
-        return Con
+
+
+def ErrorBoundingAttributeChecks(EnsembleHierarchy):
+    E=EnsembleHierarchy
+    from firedrake import Function
+    if hasattr(E,'Mean')==0:
+        raise AttributeError('EnsembleHierarchy Does Not Have Sample Statistics As Attribute')
+    if hasattr(E,'Variance')==0:
+        raise AttributeError('EnsembleHierarchy Does Not Have Sample Statistics As Attribute')
+    if E.Type=='Data':
+        if type(E.Mean[0])==Function:
+            raise ValueError('Update SampleStatistics for new EnsembleHierarchy.Type')
+    if E.Type=='Function':
+        if type(E.Mean[0])!=Function:
+            raise ValueError('Update SampleStatistics for new EnsembleHierarchy.Type')
+
+
+
+def OptimalNl(EnsembleHierarchy,Eps,gamma=1):
+    E=EnsembleHierarchy
+    ErrorBoundingAttributeChecks(E)
+    if E.Type=="Data":
+        Tl=[]
+        for i in range(E.L):
+            Tl.append(np.linalg.norm(E.Variance[i]))
+    if E.Type=="Function":
+        Tl=[]
+        for i in range(E.L):
+            Tl.append(norm(E.Variance[i]))
+    HL=np.array(E.hl)
+    VL=np.array(Tl)
+    Nl=np.ceil(np.multiply(np.sqrt(np.multiply(VL,HL**gamma)),((2*np.sum(np.sqrt(np.divide(VL,HL**gamma))))/(Eps**2)))) 
+    return Nl
+
+
+
+def Convergence(EnsembleHierarchy,Eps):
+    E=EnsembleHierarchy
+    ErrorBoundingAttributeChecks(E)
+    if E.Type=="Data":
+        EstBias=np.linalg.norm(E.Mean[-1])
+    if E.Type=="Function":
+        EstBias=norm(E.Mean[-1])
+    Con=EstBias<((E.M-1)*Eps)/np.sqrt(2)
+    return Con
+
 
 
 class SampleStatistics():

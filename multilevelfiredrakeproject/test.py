@@ -122,8 +122,8 @@ def QoI(solution,lvl_to_prolong_to,desired_family,desired_degree,Mesh_Hierarchy,
     family=solution.state[0].function_space().ufl_element().family()
     CompCoarse=FunctionHierarchy(FunctionSpaceHierarchies[0])
     CompFine=FunctionHierarchy(FunctionSpaceHierarchies[0])
-    FHc.project(ProlongInject().ProlongUpToAnyLevel(lvl_to_prolong_to,solution.state[0],CompCoarse))
-    FHf.project(ProlongInject().ProlongUpToAnyLevel(lvl_to_prolong_to,solution.state[1],CompFine))
+    FHc.project(ProlongUpToAnyLevel(lvl_to_prolong_to,solution.state[0],CompCoarse))
+    FHf.project(ProlongUpToAnyLevel(lvl_to_prolong_to,solution.state[1],CompFine))
     solution_copy=solution
     new_tuple=tuple([FHc,FHf])
     solution_copy.state=new_tuple
@@ -248,14 +248,13 @@ MLMCMean=ensemble_hierarchy.MultilevelExpectation
 
 
 
+
 """ ********** """
 
 # find error bounding
 
-
-Bounds=ErrorBounding(ensemble_hierarchy,1e-3)
-Bounds.OptimalNl()
-Bounds.Convergence()
+OptimalNl(ensemble_hierarchy,1e-3)
+Convergence(ensemble_hierarchy,1e-3)
 
 # Change function space via Forecast or something, and don't update SampleStats.
 
@@ -265,11 +264,16 @@ SampleStatistics(ensemble_hierarchy)
 
 # Then see if Bounds Have Error
 
-Bounds=ErrorBounding(ensemble_hierarchy,1e-3)
-Bounds.OptimalNl()
-Bounds.Convergence()
+OptimalNl(ensemble_hierarchy,1e-3)
+Convergence(ensemble_hierarchy,1e-3)
 
 """ ********** """
+
+
+
+
+
+
 
 # CREATE ENSEMBLE FORECAST - the ensemble hierarchy shouldn't change
 
