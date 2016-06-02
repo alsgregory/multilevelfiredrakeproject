@@ -15,9 +15,9 @@ class EnsembleHierarchy():
     def __init__(self,M=2):
         self.Type="Function" #: This is either 'Data' or 'Function' depending on what the entries into :attr:`EnsembleHierarchy.Ensemble` are.
         self.Ensemble=[] #: This is the actual hierarchy of ensembles
-        self.hl=[] #: A list of the finer timesteps used on each level of the hierarchy
         self.L=0 #: Length of the hierarchy
         self.M=M #: Refinement factor
+        self.nxl=[]
         # Preallocate attributes
         self.MultilevelExpectation=None #: Either 'Data' or 'Function' of the MLMC estimator of the expectation of the ensembles.
         self.Mean=[] #: A list of the sample means of each of the different levels
@@ -45,37 +45,45 @@ class EnsembleHierarchy():
         
         """Appends a prepared state to the defined level of the ensemble hierarchy.
         
-        	:param tuple_to_append: The prepared state.
-        	:type tuple_to_append: :attr:`state.prepared_state'
+        	:param tuple_to_append: The state.
+        	:type tuple_to_append: :attr:`state.state'
         	
-        	:param Level_to_append_to: The index of the ensemble hierarchy to append the prepared state to. If this is greater than the current number of levels of the hierarchy, a new level will be made.
+        	:param Level_to_append_to: The index of the ensemble hierarchy to append the state to. If this is greater than the current number of levels of the hierarchy, a new level will be made.
         	:type Level_to_append_to: int
         
         
         """ 
         
-        if hasattr(tuple_to_append,'prepared_state')==0:
-            raise AttributeError('State hasnt been prepared for appedning into ensemble hierarchy')
-        else:
-            if tuple_to_append.prepared_state==None:
-                raise ValueError('State hasnt been prepared for appending into ensemble hierarchy. Use quantity of interest function. See attribute discretization.ProblemSet.QoI')
+        #if hasattr(tuple_to_append,'prepared_state')==0:
+        #    raise AttributeError('State hasnt been prepared for appedning into ensemble hierarchy')
+        #else:
+        #    if tuple_to_append.prepared_state==None:
+        #        raise ValueError('State hasnt been prepared for appending into ensemble hierarchy. Use quantity of interest function. See attribute discretization.ProblemSet.QoI')
+        if type(tuple_to_append)!=tuple:
+            raise TypeError('input to append isnt a tuple')
+        if get_level(tuple_to_append[0])[1]<0:
+            raise TypeError('state members arent part of function hierarchy')
         if self.L+1<=Level_to_append_to:
             raise ValueError('Cant append to level more than 1 above EnsembleHierarchy.L')
         #try:
-        if Level_to_append_to<len(self.Ensemble):
-            if type(tuple_to_append.prepared_state[0])!=Function:
-                raise TypeError('The prepared state does not consist of Function types')
-            self.Ensemble[Level_to_append_to].append(tuple_to_append.prepared_state)
+        if Level_to_append_to<len(self.Ensemble): # if there already exists that level in ensemble hierarchy
+            if type(tuple_to_append[0])!=Function:
+                raise TypeError('The state does not consist of Function types')
+            self.Ensemble[Level_to_append_to].append(tuple_to_append)
             self.__SameFunctionSpaceErrorCheck() # check for all same function space
             self.Weights[Level_to_append_to]=tuple([np.ones(len(self.Ensemble[Level_to_append_to]))*(1/float(len(self.Ensemble[Level_to_append_to]))),np.ones(len(self.Ensemble[Level_to_append_to]))*(1/float(len(self.Ensemble[Level_to_append_to])))])
         #except IndexError:
-        if Level_to_append_to>=len(self.Ensemble):
+        if Level_to_append_to>=len(self.Ensemble): # if the level doesn't exist in ensemble hierarchy
             self.Ensemble.append([])
             self.Weights.append([])
-            self.Ensemble[Level_to_append_to].append(tuple_to_append.prepared_state)
+            self.Ensemble[Level_to_append_to].append(tuple_to_append)
             self.L=self.L+1
-            self.hl.append(tuple_to_append.hf)
-            self.__OriginalFunctionSpaces.append(tuple([tuple_to_append.prepared_state[0].function_space(),tuple_to_append.prepared_state[1].function_space()]))
+            # find out number of cells in new level of resolution
+            lvl=get_level(tuple_to_append[1])[1]
+            self.nxl.append((tuple_to_append[1].function_space().mesh().topology.num_cells()/2.0)*(self.M**(tuple_to_append[1].function_space().mesh().geometric_dimension()*(
+-lvl+Level_to_append_to))))
+            #
+            self.__OriginalFunctionSpaces.append(tuple([tuple_to_append[0].function_space(),tuple_to_append[1].function_space()]))
             self.__SameFunctionSpaceErrorCheck() # check for all same function space
             self.Weights[Level_to_append_to]=tuple([np.ones(len(self.Ensemble[Level_to_append_to]))*(1/float(len(self.Ensemble[Level_to_append_to]))),np.ones(len(self.Ensemble[Level_to_append_to]))*(1/float(len(self.Ensemble[Level_to_append_to])))])
     

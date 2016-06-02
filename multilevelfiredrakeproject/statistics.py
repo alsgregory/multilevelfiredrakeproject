@@ -32,7 +32,7 @@ def OptimalNl(EnsembleHierarchy,Eps,gamma=1):
         Tl=[]
         for i in range(E.L):
             Tl.append(norm(E.Variance[i]))
-    HL=np.array(E.hl)
+    HL=np.array(E.nxl)**(-1)
     VL=np.array(Tl)
     Nl=np.ceil(np.multiply(np.sqrt(np.multiply(VL,HL**gamma)),((2*np.sum(np.sqrt(np.divide(VL,HL**gamma))))/(Eps**2)))) 
     return Nl
@@ -113,17 +113,7 @@ class SampleStatistics():
         for i in range(len(FunctionEnsemble[-1])):
             m+=FunctionEnsemble[-1][i][1].at([0.5,0.5])*(1/len(FunctionEnsemble[-1]))
         return m
-    def OnlineEnsembleMean(self,FunctionEnsemble):
-        # this one is really only for confirming consistency, can get rid of!
-        m=np.zeros(len(FunctionEnsemble))
-        for i in range(len(FunctionEnsemble)):
-            for j in range(len(FunctionEnsemble[i])):
-                if i==0:
-                    m[i]+=FunctionEnsemble[i][j][1].at([0.5,0.5])*(1/len(FunctionEnsemble[i]))
-                else:
-                    m[i]+=(FunctionEnsemble[i][j][1].at([0.5,0.5])-FunctionEnsemble[i][j][0].at([0.5,0.5]))*(1/len(FunctionEnsemble[i]))
-        return m
-    """ """    *************************   """
+    """
     def __OnlineCovariance(self): # THIS NEEDS TO BE CHANGED TO ACTUALLY BE COVARIANCE -> NOT JUST DIAGONAL OF VAR OF ALL COMPONENTS -> DO SOMETHING LIKE IN SPATIAL POST PROCESSING
         if self.__E.Type=="Data":
             Vl=[]

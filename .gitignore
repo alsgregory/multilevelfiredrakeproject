@@ -5,6 +5,7 @@
 *.bat
 Makefile
 
+getting_started.md
 
 
 # ignore pyc files

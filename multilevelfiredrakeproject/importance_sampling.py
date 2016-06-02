@@ -6,7 +6,21 @@ Alastair Gregory 2016
 
 """
 
-
+def UpdateWeights(Ensemble_Hierarchy,ProposalDistribution):
+    
+    """ This updates the weights of the :class:`EnsembleHierarchy' by using an importance sampling update with the proposal distribution (this is a function taking a value and giving a probability) given
+    
+    """
+    
+    # Weights
+    Weights=Ensemble_Hierarchy.Weights
+    # Now use a weighting inverse to proposal distribution
+    NewWeights=[]
+    for i in range(len(Weights)):
+        for j in range(len(Weights[i])):
+            for k in range(len(Weights[i][j])):
+                NewWeights.append([])
+    
 
 class ImportanceSampling():
     def __init__(self,EnsembleStructure,OriginalWeights,ProposalDistribution):

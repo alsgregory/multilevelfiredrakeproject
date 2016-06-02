@@ -14,14 +14,11 @@ from ensemble_type import EnsembleHierarchy, CopyEnsembleHierarchy
 
 from prolong_inject import InjectDownToAnyLevel, ProlongUpToAnyLevel, ProlongUpToFinestLevel
 
-from discretization import Discretization, ProblemSet
-
-from initialization import setup
+from initialization import GenerateMeshHierarchy
 
 from state import state
 
 from version import *
-
 
 
 
