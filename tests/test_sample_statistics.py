@@ -29,13 +29,19 @@ test_sample_statistics_length(ensemble_case_example)
 
 
 def test_sample_statistics_type(ensemble_case_example):
+    ensemble_case_example.EnsembleTransfer('Data')
+    SampleStatistics(ensemble_case_example)
     if ensemble_case_example.Type=='Data':
-        if type(ensemble_case_example.MultilevelExpectation)!=np.ndarray:
+        if type(ensemble_case_example.MultilevelExpectation)!=Function:
             raise ValueError('failed')
-        if type(ensemble_case_example.Mean[0])!=np.ndarray:
+        if type(ensemble_case_example.Mean[0])!=Function:
             raise ValueError('failed')
-        if type(ensemble_case_example.Variance[0])!=np.ndarray:
+        if type(ensemble_case_example.Variance[0])!=Function:
             raise ValueError('failed')
+    else:
+        raise TypeError('failed')
+    ensemble_case_example.EnsembleTransfer('Function')
+    SampleStatistics(ensemble_case_example)
     if ensemble_case_example.Type=='Function':
         if type(ensemble_case_example.MultilevelExpectation)!=Function:
             raise ValueError('failed')
@@ -43,6 +49,8 @@ def test_sample_statistics_type(ensemble_case_example):
             raise ValueError('failed')
         if type(ensemble_case_example.Variance[0])!=Function:
             raise ValueError('failed')
+    else:
+        raise TypeError('failed')
 
 test_sample_statistics_type(ensemble_case_example)
 

@@ -142,8 +142,8 @@ print ensemble_hierarchy.Type
 
 SampleStatistics(ensemble_hierarchy)
 
-print 'mean: ', np.linalg.norm(ensemble_hierarchy.Mean[0]),np.linalg.norm(ensemble_hierarchy.Mean[1]), np.linalg.norm(ensemble_hierarchy.Mean[2])
-print 'variance: ', np.linalg.norm(ensemble_hierarchy.Variance[0]),np.linalg.norm(ensemble_hierarchy.Variance[1]), np.linalg.norm(ensemble_hierarchy.Variance[2])
+print 'mean: ', norm(ensemble_hierarchy.Mean[0]),norm(ensemble_hierarchy.Mean[1]), norm(ensemble_hierarchy.Mean[2])
+print 'variance: ', norm(ensemble_hierarchy.Variance[0]),norm(ensemble_hierarchy.Variance[1]), norm(ensemble_hierarchy.Variance[2])
 
 MLMCMean=ensemble_hierarchy.MultilevelExpectation
 
