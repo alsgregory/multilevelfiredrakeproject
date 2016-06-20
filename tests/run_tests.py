@@ -30,29 +30,3 @@ os.system('python test_convergence.py')
 
 
 
-"""
-
-# Now run tests
-
-import test_import
-
-import test_prolong_inject
-
-import test_ensemble_forecast
-
-import test_ensemble_transfer
-
-import test_ensemble_hierarchy
-
-import test_sample_statistics
-
-import test_state
-
-import test_convergence
-
-
-
-"""
-
-
-
