@@ -1,4 +1,4 @@
-from __future__ import division # Get proper divison
+from __future__ import division  # Get proper divison
 import numpy as np
 import random
 
@@ -13,20 +13,31 @@ from test_ensemble_case import *
 
 ensemble_case_example = make_ensemble()
 
+
 def test_ensemble_transfer_consistency():
-    current_type=ensemble_case_example.Type
-    if current_type=='Data':
-        Save=CopyEnsembleHierarchy(ensemble_case_example).Copy
+
+    current_type = ensemble_case_example.Type
+
+    if current_type == 'Data':
+        Save = CopyEnsembleHierarchy(ensemble_case_example).Copy
+
     else:
-        assert current_type=='Function'
+
+        assert current_type == 'Function'
+
         ensemble_case_example.EnsembleTransfer('Data')
-        Save=CopyEnsembleHierarchy(ensemble_case_example).Copy
+        Save = CopyEnsembleHierarchy(ensemble_case_example).Copy
+
     # Convert twice
     ensemble_case_example.EnsembleTransfer('Function')
-    assert ensemble_case_example.Type=='Function'
+
+    assert ensemble_case_example.Type == 'Function'
+
     ensemble_case_example.EnsembleTransfer('Data')
-    assert ensemble_case_example.Type=='Data'
-    assert ensemble_case_example.Ensemble[0][0][0,0]==Save.Ensemble[0][0][0,0]
+
+    assert ensemble_case_example.Type == 'Data'
+
+    assert ensemble_case_example.Ensemble[0][0][0, 0] == Save.Ensemble[0][0][0, 0]
 
 
 if __name__ == "__main__":
