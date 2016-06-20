@@ -1,8 +1,7 @@
 from __future__ import division # Get proper divison
 import numpy as np
 import random
-from scipy import stats
-from scipy.stats import norm
+
 from firedrake import *
 parameters["reorder_meshes"] = False
 from multilevelfiredrakeproject import *
@@ -36,8 +35,10 @@ def make_ensemble():
             u.state[1].assign(Solve(lvlf,FunctionSpaceHierarchies,u.state[1]))
             u_new=state(ProlongUpToFinestLevel(u.state[0],FunctionHierarchy(FunctionSpaceHierarchies)),ProlongUpToFinestLevel(u.state[1],FunctionHierarchy(FunctionSpaceHierarchies)))
             ensemble_hierarchy.AppendToEnsemble(u_new.state,i)
-            if get_level(u_new.state[1])[1]!=len(Mesh_Hierarchy)-1:
-                raise ValueError('Prepared state does not have default level_to_prolong_to')
+            assert get_level(u_new.state[1])[1]==len(Mesh_Hierarchy)-1
     return ensemble_hierarchy
 
-
+if __name__ == "__main__":
+    import os
+    import pytest
+    pytest.main(os.path.abspath(__file__))

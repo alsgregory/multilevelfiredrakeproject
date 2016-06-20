@@ -1,8 +1,7 @@
 from __future__ import division # Get proper divison
 import numpy as np
 import random
-from scipy import stats
-from scipy.stats import norm
+
 from firedrake import *
 parameters["reorder_meshes"] = False
 from multilevelfiredrakeproject import *
@@ -18,12 +17,8 @@ def test_prolong_to_finest_level():
     F[len(M)-1].interpolate(Expression("3"))
     H=FunctionHierarchy(V)
     A=ProlongUpToFinestLevel(F[0],H)
-    if get_level(A)[1]!=len(M)-1:
-        raise AssertionError('failed')
-    if norm(assemble(A-F[len(M)-1]))>0:
-        raise AssertionError('hasnt prolonged. failed')
-
-test_prolong_to_finest_level()
+    assert get_level(A)[1]==len(M)-1
+    assert norm(assemble(A-F[len(M)-1]))<=0
 
 def test_prolong_with_non_hierarchy_function():
     M=MeshHierarchy(UnitSquareMesh(10,10),3)
@@ -37,12 +32,7 @@ def test_prolong_with_non_hierarchy_function():
         A=ProlongUpToFinestLevel(F,H)
     except IndexError:
         a=1
-    if a==0:
-        raise AssertionError('failed')
-
-
-test_prolong_with_non_hierarchy_function()
-
+    assert a==1
 
 def test_prolong_to_any_level():
     M=MeshHierarchy(UnitSquareMesh(10,10),3)
@@ -53,14 +43,8 @@ def test_prolong_to_any_level():
     F[2].interpolate(Expression("3"))
     H=FunctionHierarchy(V)
     A=ProlongUpToAnyLevel(2,F[0],H)
-    if get_level(A)[1]!=2:
-        raise AssertionError('failed')
-    if norm(assemble(A-F[2]))>0:
-        raise AssertionError('hasnt prolonged. failed')
-
-
-test_prolong_to_any_level()
-
+    assert get_level(A)[1]==2
+    assert norm(assemble(A-F[2]))<=0
 
 def test_inject_to_any_level():
     M=MeshHierarchy(UnitSquareMesh(10,10),3)
@@ -71,11 +55,11 @@ def test_inject_to_any_level():
     F[0].interpolate(Expression("3"))
     H=FunctionHierarchy(V)
     A=InjectDownToAnyLevel(0,F[-1],H)
-    if get_level(A)[1]!=0:
-        raise AssertionError('failed')
-    if norm(assemble(A-F[0]))>0:
-        raise AssertionError('hasnt prolonged. failed')
+    assert get_level(A)[1]==0
+    assert norm(assemble(A-F[0]))<=0
 
 
-test_inject_to_any_level()
-
+if __name__ == "__main__":
+    import os
+    import pytest
+    pytest.main(os.path.abspath(__file__))

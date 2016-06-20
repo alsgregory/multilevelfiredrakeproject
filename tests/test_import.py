@@ -1,8 +1,7 @@
 from __future__ import division # Get proper divison
 import numpy as np
 import random
-from scipy import stats
-from scipy.stats import norm
+
 from firedrake import *
 parameters["reorder_meshes"] = False
 from multilevelfiredrakeproject import *
@@ -17,13 +16,13 @@ from test_problem_functions import *
 
 
 def module_check():
-    if hasattr(EnsembleHierarchy,'EnsembleTransfer')==False:
-        raise AttributeError('failed')
-    if hasattr(EnsembleHierarchy,'AppendToEnsemble')==False:
-        raise AttributeError('failed')
-    #
-    if hasattr(EnsembleForecast,'EnsembleTransfer')==False:
-        raise AttributeError('failed')
+    # test the imports
+    assert hasattr(EnsembleHierarchy,'EnsembleTransfer')==True
+    assert hasattr(EnsembleHierarchy,'AppendToEnsemble')==True
+    assert hasattr(EnsembleForecast,'EnsembleTransfer')==True
 
+if __name__ == "__main__":
+    import os
+    import pytest
+    pytest.main(os.path.abspath(__file__))
 
-module_check()
