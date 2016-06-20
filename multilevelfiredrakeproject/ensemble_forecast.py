@@ -239,13 +239,20 @@ class EnsembleForecast(object):
 
     def __MLMCCovariance(self, Ensembles):
         
+        # need to make multilevel correlation and multilevel standard deviations, then compose c_ml that way.
+        
         for i in range(len(Ensembles)):
             
             if i == 0:
-                C = np.cov(Ensembles[0][1])
+                R = np.corrcoef(Ensembles[0][1])
+                D = np.diag(np.sqrt(np.diag(np.cov(Ensembles[0][1]))))
             
             else:
-                C += np.cov(Ensembles[i][1]) - np.cov(Ensembles[i][0])
+                R += np.corrcoef(Ensembles[i][1]) - np.corrcoef(Ensembles[i][0])
+                D += np.diag(np.sqrt(np.diag(np.cov(Ensembles[i][1]))) - np.sqrt(np.diag(np.cov(Ensembles[i][0]))))
+        
+        # alternate c_ml estimator, via standard deviations and correlation
+        C=np.dot(np.dot(D,R),D)
         
         return C
 
